@@ -103,14 +103,30 @@ class ComputerDealer:
       self.casinoBalance=self.casinoBalance+bet
   
   def getInfo(self):
-    print(f"**Computer currently has a {self.all_cards[0]} which sums {self.all_cards[0].value}\n**")
+    print(f"Computer currently has one upside {self.all_cards[0]} which sums {self.all_cards[0].value}\n")
 
-  def checkSum(self):
+  def checkSum(self,aceSum):
     sum=0
     for x in range(len(self.all_cards)):
      sum=sum+self.all_cards[x].value
+    print(f"Computer {self.name} currently has a total sum of {sum-aceSum} from their {len(self.all_cards)} cards\n")
+    
+    return sum-aceSum
+    
+  def containsAce(self):
+    aceCounter=0
+    for x in range(len(self.all_cards)):
+     if(self.all_cards[x].rank=="Ace"):
+       aceCounter+=1
+       
+    return aceCounter
+
+  def isAce(self,i):
+    if self.all_cards[i].rank=="Ace":
+      return True
+    else:
+      return False
       
-    return sum
    
 
 #MAIN
@@ -130,19 +146,25 @@ computer.addCard(gameDeck.deal_one())
 
 game = True
 game_on= True
-playerSum=0
-computerSum=0
-playerAce=False
-aceSum=0
-i=1;
+
 aceSumChange = False
 isAce = False
 
 while game:
   
-  
-  print("Welcome to BlackJack. May the Odds be with You\n")
-  print("Remember that Aces can either count as a 1 or 11. Whichever favours you")
+  choice =""
+  playerSum=0
+  computerSum=0
+  playerAce=False
+  aceSum=0
+  cSum=0
+  i=1;
+  n=1;
+  aceSumChange = False
+  isAce = False
+
+  print("\nWelcome to BlackJack. May the Odds be with You")
+  print("Remember that Aces can either count as a 1 or 11. Whichever favours you\n")
   
   print(f"--Hello my name is {computer.name} and I will be your dealer--")
   bet = player.placeBet()
@@ -154,32 +176,33 @@ while game:
   
   playerSum = player.checkSum(aceSum)
   playerAce = player.containsAce()
-  a=playerAce
+
+  computer.getInfo()
+  computerAce =computer.containsAce()
+  computerTurn = False
+  
+  a = playerAce 
+  c = computerAce
 
   if(a==2):
     a-=1
     aceSum=10
     print("DoubleAce")
-    print(f"Due to having an Ace. Its value will be automatically reduced to the value of 1 to avoid a Bust ** New sum: {playerSum}**\n")
+    playerSum = player.checkSum(aceSum)
+    print(f"{player.name} has two aces. One value will be automatically reduced to the value of 1 to avoid a Bust ** New sum: {playerSum}**\n")
 
   if(playerSum==21):
     print(f"{player.name} has Won the game. {bet*2} has been added to your balance")
     player.updateBalance(bet)
     computer.updateBalance("lost",bet*2)
     
-  if(playerSum>21):
-     print(f"{player.name} has Lost the game. {bet} have been reduced from your balance")
-     computer.updateBalance("won",bet)
-    
-  
-  computerStum = computer.checkSum()
-  computer.getInfo()
-  #Possible to win with only two cards LOGIC
-  ##
   while game_on:
-    choice = input("If you wish to hit, type h - If you wish to Stand, type s \n")
-
-    if choice=="h":
+    if(computerTurn==False):
+     choice = input("If you wish to hit, type h - If you wish to Stand, type s \n")
+    else:
+      choice=""
+      
+    if choice=="h" and computerTurn==False:
       i+=1
       player.addCard(gameDeck.deal_one())
       print(f"{player.name} has received a {player.all_cards[i]}")
@@ -190,14 +213,10 @@ while game:
       playerSum=player.checkSum(aceSum) 
       playerAce = player.containsAce()
       
-
-      if playerSum>21 and playerAce>0 and aceSumChange==False: 
+      if playerSum>21 and a>0: 
         playerSum = playerSum-10  
         aceSum = aceSum+10
-        a-=a
-        if a==0:
-          aceSumChange=True
-        
+        a-=a 
         print(f"Due to having an Ace. Its value will be automatically reduced to the value of 1 to avoid a Bust ** New sum: {playerSum}**\n")
     
       if playerSum==21: 
@@ -211,7 +230,80 @@ while game:
         computer.updateBalance("won",bet)
         break;
 
+        
+    if computerTurn==True:  
+      n+=1
+      print(f"{computer.name} will now Hit!")
+      computer.addCard(gameDeck.deal_one())
+      print(f"{computer.name} has received a {computer.all_cards[n]}")
+      isAce = computer.isAce(n)
+      if isAce:
+        c+=1
+        
+      computerSum=computer.checkSum(cSum) 
+      
+      if computerSum>21 and c>0 : 
+        computerSum = computerSum-10  
+        cSum = cSum+10
+        c-=c
+        print(f"Due to having an Ace. Its value will be automatically reduced to the value of 1 to avoid a Bust ** New sum: {computerSum}**\n")
+
+      if computerSum>21 :
+        print(f"{computer.name} has Bust the game. {bet} have been added to {player.name}'s balance")
+        player.updateBalance(bet)
+        computer.updateBalance("lost",bet*2)
+        break;
+
+      if computerSum==21:
+        print(f"{computer.name} sum is {computerSum}")
+        print(f"{player.name} has Lost the game. {bet} have been reduced from your balance")
+        computer.updateBalance("won",bet)
+        break;
+
+      if computerSum>playerSum:
+        print(f"{computer.name} sum: {computerSum} is greater than: {player.name} sum {playerSum}")
+        print(f"{player.name} has Lost the game. {bet} have been reduced from your balance")
+        computer.updateBalance("won",bet)
+        break;
+
+     
+
+    
+
     if choice=="s":
+
+      print(f"\n{player.name} decides to stay. {computer.name} turn!")
+      print(f"{computer.name} reveals the upside down card. It's a {computer.all_cards[1]}\n")  
+      
+      computerSum = computer.checkSum(cSum)
+      
+      if(c==2):
+        c-=1
+        cSum=10
+        computerSum = computer.checkSum(cSum)
+        print(f"{computer.name} has two aces. One value will be automatically reduced to the value of 1 to avoid a Bust ** New sum: {computerSum}**\n")
+
+      if computerSum==21:
+        print(f"{computer.name} sum is {computerSum}")
+        print(f"{player.name} has Lost the game. {bet} have been reduced from your balance")
+        computer.updateBalance("won",bet)
+        break;
+
+      if computerSum>playerSum:
+        print(f"{computer.name} sum: {computerSum} is greater than {player.name} sum: {playerSum}")
+        print(f"{player.name} has Lost the game. {bet} have been reduced from your balance")
+        computer.updateBalance("won",bet)
+        break;
+
+      if computerSum<=playerSum:
+        computerTurn = True
+        
+        
+        
+      
+        
+      
+      
       
 
       
