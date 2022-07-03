@@ -1,7 +1,7 @@
 import random
 
 suits = ('Hearts', 'Diamonds', 'Spades', 'Clubs')
-ranks = ('Six', 'Eight', 'Ace')
+ranks = ('Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace')
 values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8, 
             'Nine':9, 'Ten':10, 'Jack':10, 'Queen':10, 'King':10, 'Ace':11}
 
@@ -249,7 +249,7 @@ while game:
         print(f"Due to having an Ace. Its value will be automatically reduced to the value of 1 to avoid a Bust ** New sum: {computerSum}**\n")
 
       if computerSum>21 :
-        print(f"{computer.name} has Bust the game. {bet} have been added to {player.name}'s balance")
+        print(f"{computer.name} has Bust the game. {bet*2} have been added to {player.name}'s balance")
         player.updateBalance(bet)
         computer.updateBalance("lost",bet*2)
         break;
