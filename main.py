@@ -42,6 +42,9 @@ class Player:
   def removeOne(self):
     return self.all_cards.pop(0)
 
+  def freshDeck(self):
+    self.all_cards=[]
+      
   def addCard(self,new_cards):
     
     if type(new_cards) == type([]):
@@ -50,7 +53,6 @@ class Player:
       self.all_cards.append(new_cards)
 
   def placeBet(self):
-    
     while True:
       bet = int(input("Please place your bet: "))
       if bet>self.balance:
@@ -63,7 +65,9 @@ class Player:
         
   def updateBalance(self,bet):
       self.balance=self.balance+(bet*2)
-      
+      print(f"New balance: {self.balance}\n")
+  
+     
   def checkSum(self,aceSum):
     sum=0
     for x in range(len(self.all_cards)):
@@ -117,8 +121,7 @@ class ComputerDealer:
     aceCounter=0
     for x in range(len(self.all_cards)):
      if(self.all_cards[x].rank=="Ace"):
-       aceCounter+=1
-       
+       aceCounter+=1  
     return aceCounter
 
   def isAce(self,i):
@@ -127,40 +130,52 @@ class ComputerDealer:
     else:
       return False
       
+  def freshDeck(self):
+    self.all_cards=[]
+      
    
 
 #MAIN
-#Game Set-Up
-
-gameDeck = Deck()
-gameDeck.shuffleDeck()
-
-player = Player("Pablo", 100000)
-computer = ComputerDealer("Alexa", 500000)
-
-#Delivering the first two cards to the Player and the Computer. Can be done with a for loop as player size increases
-player.addCard(gameDeck.deal_one())
-player.addCard(gameDeck.deal_one())
-computer.addCard(gameDeck.deal_one())
-computer.addCard(gameDeck.deal_one())
-
+      
 game = True
 game_on= True
+playerName = input("Please enter your nickname (it can be numbers too): ")
 
-aceSumChange = False
-isAce = False
+while True:
+  try:
+     playerBalance = int(input("And your starting balance: "))
+  except:
+    print("Wrong input. Balance must be a number\n")
+  else:
+    if playerBalance>0:
+      break
+    else:
+       print("Wrong input. Balance must be higher than 0\n")
+
+#Player and Computer set-up
+player = Player(playerName, playerBalance) #Name and balance set-up
+computer = ComputerDealer("Alexa", 500000) #Name and balance set-up
 
 while game:
+  
+  #Game Set-Up
+  gameDeck = Deck()
+  gameDeck.shuffleDeck()
+  player.freshDeck() #Fresh player deck every round
+  computer.freshDeck() #Fresh computer deck every round
+  
+  player.addCard(gameDeck.deal_one())
+  player.addCard(gameDeck.deal_one())
+  computer.addCard(gameDeck.deal_one())
+  computer.addCard(gameDeck.deal_one())
   
   choice =""
   playerSum=0
   computerSum=0
-  playerAce=False
   aceSum=0
   cSum=0
   i=1;
   n=1;
-  aceSumChange = False
   isAce = False
 
   print("\nWelcome to BlackJack. May the Odds be with You")
@@ -197,12 +212,16 @@ while game:
     computer.updateBalance("lost",bet*2)
     
   while game_on:
+    
     if(computerTurn==False):
      choice = input("If you wish to hit, type h - If you wish to Stand, type s \n")
+     if choice!= "h" and choice!="s":
+       print("Wrong input. Type either h for hit or s to Stand\n")        
     else:
       choice=""
-      
-    if choice=="h" and computerTurn==False:
+
+    #Hit Logic
+    if choice.lower()=="h" and computerTurn==False:
       i+=1
       player.addCard(gameDeck.deal_one())
       print(f"{player.name} has received a {player.all_cards[i]}")
@@ -230,7 +249,8 @@ while game:
         computer.updateBalance("won",bet)
         break;
 
-        
+
+    #Computer Turn logic
     if computerTurn==True:  
       n+=1
       print(f"{computer.name} will now Hit!")
@@ -269,8 +289,8 @@ while game:
      
 
     
-
-    if choice=="s":
+    # Stand Logic
+    if choice.lower()=="s":
 
       print(f"\n{player.name} decides to stay. {computer.name} turn!")
       print(f"{computer.name} reveals the upside down card. It's a {computer.all_cards[1]}\n")  
